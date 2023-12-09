@@ -18,7 +18,7 @@ import Channel.*;
 %bits = randi([0 1], 1, 48 * 1000);
 
 bits = randi([0 1], 1, 12000);
-SNR = 10;
+SNR = 1:1:10;
 E = 5;
 
 %% Add modulators
@@ -36,38 +36,70 @@ psk8_mod = modulated_signals(char(ModulationTypes.PSK8));
 qam16_mod = modulated_signals(char(ModulationTypes.QAM16));
 
 %% Add noise
-channel = Channel(SNR);
+theoretical_bpsk_ber = [];
+theoretical_qpsk_ber = [];
+theoretical_psk8_ber = [];
+theoretical_qam16_ber = [];
 
-[noisy_bpsk, bpsk_ber] = channel.addNoise(bpsk_mod, E, ModulationTypes.BPSK);
-[noisy_qpsk, qpsk_ber] = channel.addNoise(qpsk_mod, E, ModulationTypes.QPSK);
-[noisy_psk8, psk8_ber] = channel.addNoise(psk8_mod, E, ModulationTypes.PSK8);
-[noisy_qam16, qam16_ber] = channel.addNoise(qam16_mod, E, ModulationTypes.QAM16);
+simulated_bpsk_ber = [];
+simulated_qpsk_ber = [];
+simulated_psk8_ber = [];
+simulated_qam16_ber = [];
 
-%% Demodulate
-psk8_demod = demapBits(noisy_psk8, E, ModulationTypes.PSK8);
-qam16_demod = demapBits(noisy_qam16, E, ModulationTypes.QAM16);
-bpsk_demod = demapBits(noisy_bpsk, E, ModulationTypes.BPSK);
-qpsk_demod = demapBits(noisy_qpsk, E, ModulationTypes.QPSK);
+for i = 1:length(SNR)
+    channel = Channel(SNR(i));
+    [temp_noisy_bpsk, temp_bpsk_ber] = channel.addNoise(bpsk_mod, E, ModulationTypes.BPSK);
+    [temp_noisy_qpsk, temp_qpsk_ber] = channel.addNoise(qpsk_mod, E, ModulationTypes.QPSK);
+    [temp_noisy_psk8, temp_psk8_ber] = channel.addNoise(psk8_mod, E, ModulationTypes.PSK8);
+    [temp_noisy_qam16, temp_qam16_ber] = channel.addNoise(qam16_mod, E, ModulationTypes.QAM16);
 
-%% Calculate bit loss
-bpsk_bit_loss = bpsk_ber .* length(bits);
-qpsk_bit_loss = qpsk_ber .* length(bits);
-psk8_bit_loss = psk8_ber .* length(bits);
-qam16_bit_loss = qam16_ber .* length(bits);
+    %% Demodulate
+    psk8_demod = demapBits(temp_noisy_psk8, E, ModulationTypes.PSK8);
+    qam16_demod = demapBits(temp_noisy_qam16, E, ModulationTypes.QAM16);
+    bpsk_demod = demapBits(temp_noisy_bpsk, E, ModulationTypes.BPSK);
+    qpsk_demod = demapBits(temp_noisy_qpsk, E, ModulationTypes.QPSK);
 
-%% Display results
-fprintf("Actual number of errors:\n")
-fprintf("BPSK: %d bits,\testimated: %.5f bits\n", biterr(bits, bpsk_demod), bpsk_bit_loss)
-fprintf("QPSK: %d bits,\testimated: %.5f bits\n", biterr(bits, qpsk_demod), qpsk_bit_loss)
-fprintf("PSK8: %d bits,\testimated: %.5f bits\n", biterr(bits, psk8_demod), psk8_bit_loss)
-fprintf("QAM16: %d bits,\testimated: %.5f bits\n", biterr(bits, qam16_demod), qam16_bit_loss)
+    %% Calculate theoritical bit loss
+    theoretical_bpsk_ber(end + 1) = temp_bpsk_ber;
+    theoretical_qpsk_ber(end + 1) = temp_qpsk_ber;
+    theoretical_psk8_ber(end + 1) = temp_psk8_ber;
+    theoretical_qam16_ber(end + 1) = temp_qam16_ber;
 
-%% Plot
-scatterplot(noisy_bpsk)
-title('Noisy BPSK');
-scatterplot(noisy_qpsk)
-title('Noisy QPSK');
-scatterplot(noisy_psk8)
-title('Noisy PSK8');
-scatterplot(noisy_qam16)
-title('Noisy QAM16');
+    %% Calculate simulated bit loss
+    simulated_bpsk_ber(end + 1) = biterr(bits, bpsk_demod) / length(bits);
+    simulated_qpsk_ber(end + 1) = biterr(bits, qpsk_demod) / length(bits);
+    simulated_psk8_ber(end + 1) = biterr(bits, psk8_demod) / length(bits);
+    simulated_qam16_ber(end + 1) = biterr(bits, qam16_demod) / length(bits);
+
+    %% Print results
+    fprintf("--------------------------------------------------------\n");
+    fprintf("SNR = %d\n", SNR(i));
+
+    fprintf("Theoretical BPSK BER = %f, simulated BPSK BER = %f\n", theoretical_bpsk_ber(end), ...
+        simulated_bpsk_ber(end))
+    fprintf("Theoretical QPSK BER = %f, simulated QPSK BER = %f\n", theoretical_qpsk_ber(end), ...
+        simulated_qpsk_ber(end))
+    fprintf("Theoretical PSK8 BER = %f, simulated PSK8 BER = %f\n", theoretical_psk8_ber(end), ...
+        simulated_psk8_ber(end))
+    fprintf("Theoretical QAM16 BER = %f, simulated QAM16 BER = %f\n", theoretical_qam16_ber(end), ...
+        simulated_qam16_ber(end))
+
+    fprintf("Actual number of errors:\n")
+    fprintf("BPSK: %d bits,\testimated: %.5f bits\n", biterr(bits, bpsk_demod), theoretical_bpsk_ber(end) * length(bits))
+    fprintf("QPSK: %d bits,\testimated: %.5f bits\n", biterr(bits, qpsk_demod), theoretical_qpsk_ber(end) * length(bits))
+    fprintf("PSK8: %d bits,\testimated: %.5f bits\n", biterr(bits, psk8_demod), theoretical_psk8_ber(end) * length(bits))
+    fprintf("QAM16: %d bits,\testimated: %.5f bits\n", biterr(bits, qam16_demod), theoretical_qam16_ber(end) * length(bits))
+    fprintf("--------------------------------------------------------\n");
+
+end
+
+semilogy(SNR, theoretical_bpsk_ber, 'b.-', SNR, simulated_bpsk_ber, 'y.-');
+hold on
+semilogy(SNR, theoretical_qpsk_ber, 'r.-', SNR, simulated_qpsk_ber, 'co-');
+semilogy(SNR, theoretical_psk8_ber, 'g.-', SNR, simulated_psk8_ber, 'kx-');
+semilogy(SNR, theoretical_qam16_ber, 'y.-', SNR, simulated_qam16_ber, 'bs-');
+legend('theory BPSK', 'simulated BPSK', 'theory QPSK', 'simulated QPSK', 'theory PSK8', 'simulated PSK8', 'theory QAM16', 'simulated QAM16');
+grid on
+xlabel('Eb/No, dB');
+ylabel('Bit Error Rate');
+title('Bit error probability curve for BPSK, QPSK, PSK8 and QAM16 modulation');

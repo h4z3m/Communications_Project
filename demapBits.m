@@ -5,30 +5,29 @@ function bits = demapBits(y, E, type)
         case ModulationTypes.BPSK
 
             for i = 1:length(y)
-                a = angle(y(i));
 
-                if a >= 0
-                    bits = [bits 0];
-
-                else
+                if real(y(i)) <= 0
                     bits = [bits 1];
+                else
+                    bits = [bits 0];
                 end
 
             end
 
         case ModulationTypes.QPSK
+            theta = 2 * pi / 4;
 
             for i = 1:length(y)
                 a = angle(y(i));
 
-                if a >= -pi / 4 && a < pi / 4
+                if a >= 0 && a < theta
                     bits = [bits 0 0];
-                elseif a >= pi / 4 && a < 3 * pi / 4
+                elseif a >= theta && a < 2 * theta
                     bits = [bits 0 1];
-                elseif a <- pi / 4 && a > -3 * pi / 4
-                    bits = [bits 1 0];
-                else
+                elseif a < 0 && a > -theta
                     bits = [bits 1 1];
+                else
+                    bits = [bits 1 0];
                 end
 
             end
@@ -45,23 +44,28 @@ function bits = demapBits(y, E, type)
                 elseif a >= theta / 2 && a < 3 * theta / 2
                     bits = [bits 0 0 1];
 
-                elseif a >= 3 * theta / 2 && a < 5 * theta / 2
-                    bits = [bits 0 1 1];
-
-                elseif a >= 5 * theta / 2 && a < 7 * theta / 2
+                elseif a >= 3 * theta / 2 && a <= 5 * theta / 2
+                    % bits = [bits 0 1 1];
                     bits = [bits 0 1 0];
+
+                elseif a >= 5 * theta / 2 && a <= 7 * theta / 2
+                    % bits = [bits 0 1 0];
+                    bits = [bits 0 1 1];
 
                 elseif a >= 7 * theta / 2
                     bits = [bits 1 1 0];
+                    % bits = [bits 1 0 0];
 
-                elseif a <= -theta / 2 && a > -3 * theta / 2
+                elseif a <= -theta / 2 && a >= -3 * theta / 2
                     bits = [bits 1 0 0];
+                    % bits = [bits 1 1 1];
 
-                elseif a <= -3 * theta / 2 && a > -5 * theta / 2
+                elseif a <= -3 * theta / 2 && a >= -5 * theta / 2
                     bits = [bits 1 0 1];
+                    % bits = [bits 1 1 0];
 
                 elseif a <= -5 * theta / 2
-                    bits = [bits 1 1 1];
+                    bits = [bits 1 0 1];
 
                 else
                     disp('Error')

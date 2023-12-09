@@ -25,7 +25,6 @@ classdef Channel
 
             len = length(signal);
             No = Eb / (10 ^ (obj.SNR / 10));
-            fprintf('No = %f for type %s\n', No, char(type));
             noise_scale = sqrt(No / 2);
             noise = (randn(len, 1) + 1i * randn(len, 1)) .* noise_scale;
 
