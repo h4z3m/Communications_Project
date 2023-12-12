@@ -4,7 +4,7 @@ classdef BPSKModulator < Modulator
 
         function modulated_signal = modulate(obj, E, bits)
             theta = 2 * pi * bits' / obj.M;
-            modulated_signal = E .* exp(1i * theta);
+            modulated_signal = sqrt(E) .* exp(1i * theta);
         end
 
         function obj = BPSKModulator()

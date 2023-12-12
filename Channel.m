@@ -26,11 +26,11 @@ classdef Channel
             len = length(signal);
             No = Eb / (10 ^ (obj.SNR / 10));
             noise_scale = sqrt(No / 2);
-            noise = (randn(len, 1) + 1i * randn(len, 1)) .* noise_scale;
+            noise = randn(len, 1) *(1 + 1i) .* noise_scale;
 
             switch type
                 case ModulationTypes.BPSK
-                    ber = erfc(sqrt(Eb / No));
+                    ber = (1/2) *erfc(sqrt(Eb / No));
                 case ModulationTypes.QPSK
                     ber = (1/2) * erfc(sqrt(Eb / No));
                 case ModulationTypes.PSK8

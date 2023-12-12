@@ -23,11 +23,13 @@ function bits = demapBits(y, E, type)
                 if a >= 0 && a < theta
                     bits = [bits 0 0];
                 elseif a >= theta && a < 2 * theta
-                    bits = [bits 0 1];
-                elseif a < 0 && a > -theta
                     bits = [bits 1 1];
-                else
+                elseif a < 0 && a > -theta
+                    bits = [bits 0 1];
+                elseif a < -theta && a > -2 * theta
                     bits = [bits 1 0];
+                else
+                    disp("error");
                 end
 
             end
@@ -38,37 +40,24 @@ function bits = demapBits(y, E, type)
             for i = 1:length(y)
                 a = angle(y(i));
 
-                if a >= -theta / 2 && a < theta / 2
-                    bits = [bits 0 0 0];
-
-                elseif a >= theta / 2 && a < 3 * theta / 2
+                if (a> -theta/2 && a <= 0) || (a>= 0 && a< theta/2)
                     bits = [bits 0 0 1];
-
-                elseif a >= 3 * theta / 2 && a <= 5 * theta / 2
-                    % bits = [bits 0 1 1];
-                    bits = [bits 0 1 0];
-
-                elseif a >= 5 * theta / 2 && a <= 7 * theta / 2
-                    % bits = [bits 0 1 0];
-                    bits = [bits 0 1 1];
-
-                elseif a >= 7 * theta / 2
+                elseif (a> theta/2 && a<= 3*theta/2)
+                    bits = [bits 0 0 0];
+                elseif (a> 3*theta/2 && a<= 5*theta/2)
+                    bits = [bits 1 1 1];
+                elseif (a> 5*theta/2 && a<= 7*theta/2)
                     bits = [bits 1 1 0];
-                    % bits = [bits 1 0 0];
-
-                elseif a <= -theta / 2 && a >= -3 * theta / 2
+                elseif (a> 7*theta/2 && a<= 8*theta/2) || (a>= -8*theta/2 && a< -7*theta/2)
+                    bits = [bits 1 0 1];
+                elseif (a> -7*theta/2 && a<= -5*theta/2)
                     bits = [bits 1 0 0];
-                    % bits = [bits 1 1 1];
-
-                elseif a <= -3 * theta / 2 && a >= -5 * theta / 2
-                    bits = [bits 1 0 1];
-                    % bits = [bits 1 1 0];
-
-                elseif a <= -5 * theta / 2
-                    bits = [bits 1 0 1];
-
+                elseif (a> -5*theta/2 && a<= -3*theta/2)
+                    bits = [bits 0 1 1];
+                elseif (a> -3*theta/2 && a<= -theta/2)
+                    bits = [bits 0 1 0];
                 else
-                    disp('Error')
+                    disp("error");
                 end
 
             end

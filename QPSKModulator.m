@@ -5,7 +5,7 @@ classdef QPSKModulator < Modulator
         function modulated_signal = modulate(obj, E, bits)
             symbols = obj.encodeSymbols(bits)';
             theta = 2 * pi * symbols / obj.M;
-            modulated_signal = E .* exp(1i * (theta + pi / 4));
+            modulated_signal = sqrt(E) .* exp(-1i * (theta - (pi / 4)));
         end
 
         function obj = QPSKModulator()
