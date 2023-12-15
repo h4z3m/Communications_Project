@@ -21,16 +21,26 @@ function bits = demapBits(y, E, type)
                 a = angle(y(i));
 
                 if a >= 0 && a < theta
+                    % Gray = 00, binary = 00
+                    % symbol = [0 0];
                     bits = [bits 0 0];
                 elseif a >= theta && a < 2 * theta
-                    bits = [bits 1 1];
-                elseif a < 0 && a > -theta
+                    % Gray = 01, binary = 01
+                    % symbol = [0 1];
                     bits = [bits 0 1];
-                elseif a < -theta && a > -2 * theta
+                elseif a < 0 && a > -theta
+                    % Gray = 1 1, binary = 10
+                    % symbol = [1 1];
                     bits = [bits 1 0];
+                elseif a < -theta && a > -2 * theta
+                    % Gray = 1 0, binary = 11
+                    % symbol = [1 0];
+                    bits = [bits 1 1];
                 else
                     disp("error");
                 end
+
+                % bits = [bits decimalToBinaryVector(gray2bin(bin2dec(num2str(symbol)), 'psk', 4), 2)];
 
             end
 
@@ -40,27 +50,38 @@ function bits = demapBits(y, E, type)
             for i = 1:length(y)
                 a = angle(y(i));
 
-                if (a> -theta/2 && a <= 0) || (a>= 0 && a< theta/2)
-                    bits = [bits 0 0 1];
-                elseif (a> theta/2 && a<= 3*theta/2)
+                if a <= theta / 2 && a > -theta / 2
+                    %symbol = [0 0 0];
                     bits = [bits 0 0 0];
-                elseif (a> 3*theta/2 && a<= 5*theta/2)
-                    bits = [bits 1 1 1];
-                elseif (a> 5*theta/2 && a<= 7*theta/2)
-                    bits = [bits 1 1 0];
-                elseif (a> 7*theta/2 && a<= 8*theta/2) || (a>= -8*theta/2 && a< -7*theta/2)
-                    bits = [bits 1 0 1];
-                elseif (a> -7*theta/2 && a<= -5*theta/2)
-                    bits = [bits 1 0 0];
-                elseif (a> -5*theta/2 && a<= -3*theta/2)
+                elseif (a > theta / 2) && (a <= 3 * theta / 2)
+                    %symbol = [0 0 1];
+                    bits = [bits 0 0 1];
+                elseif (a > 3 * theta / 2) && (a <= 5 * theta / 2)
+                    %symbol = [0 1 0];
                     bits = [bits 0 1 1];
-                elseif (a> -3*theta/2 && a<= -theta/2)
+                elseif (a > 5 * theta / 2) && (a <= 7 * theta / 2)
+                    % symbol = [0 1 1];
                     bits = [bits 0 1 0];
+                elseif (a > 7 * theta / 2 && a <= pi) || (a >= -pi && a <= -7 * theta / 2)
+                    % symbol = [1 0 0];
+                    bits = [bits 1 1 1];
+                elseif (a > -7 * theta / 2) && (a <= -5 * theta / 2)
+                    % symbol = [1 0 1];
+                    bits = [bits 1 1 0];
+                elseif (a > -5 * theta / 2) && (a <= -3 * theta / 2)
+                    % symbol = [1 1 0];
+                    bits = [bits 1 0 0];
+                elseif (a > -3 * theta / 2) && (a <= -theta / 2)
+                    % symbol = [1 1 1];
+                    bits = [bits 1 0 1];
                 else
                     disp("error");
                 end
 
+                % bits = [bits decimalToBinaryVector(gray2bin(bin2dec(num2str(symbol)), 'psk', 8), 3)];
             end
+
+            % bits = gray2bin(bits, 'psk', 8);
 
         case ModulationTypes.QAM16
 

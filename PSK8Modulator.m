@@ -4,8 +4,9 @@ classdef PSK8Modulator < Modulator
 
         function modulated_signal = modulate(obj, E, bits)
             symbols = obj.encodeSymbols(bits)';
+            symbols = bin2gray(symbols, 'psk', 8);
             theta = 2 * pi * symbols / obj.M;
-            modulated_signal = sqrt(E) .* exp(-1i * (theta - (pi / 4)));
+            modulated_signal = sqrt(E) .* exp(1i * (theta));
         end
 
         function obj = PSK8Modulator()

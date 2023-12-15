@@ -15,9 +15,10 @@ import demapBits.*;
 import Channel.*;
 
 %bits = [1 0 1 0 0 1 0 0 1 1 1 1];
-%bits = randi([0 1], 1, 48 * 1000);
-
+% bits = randi([0 1], 1, 48 * 1000);
+rng(1023456381, 'twister');
 bits = randi([0 1], 1, 12000);
+
 SNR = 1:1:10;
 E = 5;
 
@@ -35,7 +36,6 @@ qpsk_mod = modulated_signals(char(ModulationTypes.QPSK));
 psk8_mod = modulated_signals(char(ModulationTypes.PSK8));
 qam16_mod = modulated_signals(char(ModulationTypes.QAM16));
 
-%% Add noise
 theoretical_bpsk_ber = [];
 theoretical_qpsk_ber = [];
 theoretical_psk8_ber = [];
@@ -47,6 +47,7 @@ simulated_psk8_ber = [];
 simulated_qam16_ber = [];
 
 for i = 1:length(SNR)
+    %% Pass through channel
     channel = Channel(SNR(i));
     [temp_noisy_bpsk, temp_bpsk_ber] = channel.addNoise(bpsk_mod, E, ModulationTypes.BPSK);
     [temp_noisy_qpsk, temp_qpsk_ber] = channel.addNoise(qpsk_mod, E, ModulationTypes.QPSK);
@@ -66,10 +67,10 @@ for i = 1:length(SNR)
     theoretical_qam16_ber(end + 1) = temp_qam16_ber;
 
     %% Calculate simulated bit loss
-    simulated_bpsk_ber(end + 1) = biterr(bits, bpsk_demod) / length(bits);
-    simulated_qpsk_ber(end + 1) = biterr(bits, qpsk_demod) / length(bits);
-    simulated_psk8_ber(end + 1) = biterr(bits, psk8_demod) / length(bits);
-    simulated_qam16_ber(end + 1) = biterr(bits, qam16_demod) / length(bits);
+    [a, simulated_bpsk_ber(end + 1)] = biterr(bits, bpsk_demod);
+    [a, simulated_qpsk_ber(end + 1)] = biterr(bits, qpsk_demod);
+    [a, simulated_psk8_ber(end + 1)] = biterr(bits, psk8_demod);
+    [a, simulated_qam16_ber(end + 1)] = biterr(bits, qam16_demod);
 
     %% Print results
     fprintf("--------------------------------------------------------\n");
@@ -92,7 +93,8 @@ for i = 1:length(SNR)
 
 end
 
-semilogy(SNR, theoretical_bpsk_ber, 'b.-', SNR, simulated_bpsk_ber, '.-','MarkerFaceColor',[0 0.447 0.741]);
+%% Plot results
+semilogy(SNR, theoretical_bpsk_ber, 'b.-', SNR, simulated_bpsk_ber, '.-', 'MarkerFaceColor', [0 0.447 0.741]);
 hold on
 semilogy(SNR, theoretical_qpsk_ber, 'ro-', SNR, simulated_qpsk_ber, 'co-');
 semilogy(SNR, theoretical_psk8_ber, 'gx-', SNR, simulated_psk8_ber, 'kx-');
