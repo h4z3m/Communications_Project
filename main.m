@@ -13,7 +13,7 @@ import Modulator.*;
 import DigitalMapper.*;
 import demapBits.*;
 import Channel.*;
-
+import scatterplot_title.*;
 %bits = [1 0 1 0 0 1 0 0 1 1 1 1];
 % bits = randi([0 1], 1, 48 * 1000);
 rng(1023456381, 'twister');
@@ -46,6 +46,7 @@ simulated_qpsk_ber = [];
 simulated_psk8_ber = [];
 simulated_qam16_ber = [];
 
+%% Simulate for all SNRs
 for i = 1:length(SNR)
     %% Pass through channel
     channel = Channel(SNR(i));
@@ -72,6 +73,12 @@ for i = 1:length(SNR)
     [a, simulated_psk8_ber(end + 1)] = biterr(bits, psk8_demod);
     [a, simulated_qam16_ber(end + 1)] = biterr(bits, qam16_demod);
 
+    %% Plot results
+    scatterplot_title(temp_noisy_bpsk, 'BPSK, SNR = ' + string(SNR(i)));
+    scatterplot_title(temp_noisy_qpsk, 'QPSK, SNR = ' + string(SNR(i)));
+    scatterplot_title(temp_noisy_psk8, 'PSK8, SNR = ' + string(SNR(i)));
+    scatterplot_title(temp_noisy_qam16, 'QAM16, SNR = ' + string(SNR(i)));
+
     %% Print results
     fprintf("--------------------------------------------------------\n");
     fprintf("SNR = %d\n", SNR(i));
@@ -84,6 +91,7 @@ for i = 1:length(SNR)
         simulated_psk8_ber(end))
     fprintf("Theoretical QAM16 BER = %f, simulated QAM16 BER = %f\n", theoretical_qam16_ber(end), ...
         simulated_qam16_ber(end))
+
     fprintf("Actual number of errors:\n")
     fprintf("BPSK: %d bits,\testimated: %.5f bits\n", biterr(bits, bpsk_demod), theoretical_bpsk_ber(end) * length(bits))
     fprintf("QPSK: %d bits,\testimated: %.5f bits\n", biterr(bits, qpsk_demod), theoretical_qpsk_ber(end) * length(bits))
@@ -94,6 +102,7 @@ for i = 1:length(SNR)
 end
 
 %% Plot results
+figure
 semilogy(SNR, theoretical_bpsk_ber, 'b.-', SNR, simulated_bpsk_ber, '.-', 'MarkerFaceColor', [0 0.447 0.741]);
 hold on
 semilogy(SNR, theoretical_qpsk_ber, 'ro-', SNR, simulated_qpsk_ber, 'co-');
